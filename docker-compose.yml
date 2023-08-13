@@ -1,0 +1,10 @@
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    env_file:
+      - ./libs/common/src/config/.env
+    volumes:
+      - ./mongoData:/data/db
+    ports:
+      - '27017:27017'
