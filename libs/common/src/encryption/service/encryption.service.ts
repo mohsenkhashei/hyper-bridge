@@ -1,16 +1,15 @@
-import { randomBytes } from 'crypto';
-// import { createClient } from 'redis';
 import { Encrypt } from './encrypt';
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { KeyGeneratorService } from './key.generator.service';
 import { EncryptionRepository } from '../encryption.repository';
-interface DataCollector {
-  [key: string]: string;
-}
 
 @Injectable()
 export class EncryptionService {
-  private dataCollector: DataCollector;
+  private salt = 'Mohsen';
 
   constructor(
     private readonly keyGeneratorService: KeyGeneratorService,
@@ -32,33 +31,44 @@ export class EncryptionService {
       publicKey: public_key,
       secretKey,
     });
-
     return { public_key };
   }
 
-  async decryptPayload(
-    headerValue: string,
-    data: { payload: string; salt: string },
-  ) {
-    const res = await this.encryptionRepository.findOne({
-      publicKey: headerValue,
-    });
+  async decryptPayload(publicKey: string, payload: string) {
+    try {
+      const res = await this.encryptionRepository.findOne({
+        publicKey,
+      });
 
-    if (!res) {
-      throw new Error('Invalid header value');
+      if (!res) {
+        throw new NotFoundException('Invalid header value');
+      }
+
+      const encryption = new Encrypt(res.secretKey, this.salt);
+      return JSON.parse(encryption.decrypt(payload));
+    } catch (err) {
+      throw new NotAcceptableException('there is problem with decryption');
     }
-    const encryption = new Encrypt(res.secretKey, data.salt);
-    return JSON.parse(encryption.decrypt(data.payload));
   }
 
   async encryptPayload(publicKey: string, payload: object) {
-    // const salt = randomBytes(32).toString('base64');
-    const salt = 'Mohsen';
-    const secretKey = await this.dataCollector[publicKey];
-    if (!secretKey) {
-      throw new Error('Invalid public key value');
+    const res = await this.encryptionRepository.findOne({
+      publicKey,
+    });
+
+    if (!res) {
+      throw new NotFoundException('Invalid public key value');
     }
-    const encryption = new Encrypt(secretKey, salt);
-    return { payload: encryption.encrypt(JSON.stringify(payload)), salt };
+
+    const encryption = new Encrypt(res.secretKey, this.salt);
+    return { payload: encryption.encrypt(JSON.stringify(payload)) };
+  }
+
+  async checkPublicKeyExist(publicKey: string) {
+    return (await this.encryptionRepository.findOne({
+      publicKey,
+    }))
+      ? true
+      : false;
   }
 }
