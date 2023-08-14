@@ -2,7 +2,6 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
-  OnModuleInit,
   RequestMethod,
   Scope,
 } from '@nestjs/common';
@@ -43,11 +42,10 @@ import { InitializationService } from './initialization.service';
   ],
 })
 export class AppModule implements NestModule {
-  constructor(private appService: AppService) {}
-
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthenticationMiddleware)
+      .exclude({ path: '/handshake', method: RequestMethod.POST })
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }
