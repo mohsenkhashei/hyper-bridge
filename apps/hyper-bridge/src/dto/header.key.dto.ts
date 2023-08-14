@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class EncryptedDataDto {
+export class HeaderKeyDto {
   @IsString()
   @IsNotEmpty()
-  data: string;
+  key: string;
 }
