@@ -1,8 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { UsersDocument } from './models/users.schema';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class InitializationService implements OnModuleInit {
@@ -15,13 +16,21 @@ export class InitializationService implements OnModuleInit {
   }
 
   async createCollections() {
-    const user = await this.usersModel.findOne({ customerNo: 2222 });
+    const user = await this.usersModel.findOne({ customerNo: 54321 });
 
     if (!user) {
       const data = {
         _id: new mongoose.Types.ObjectId(),
-        customerNo: 2222,
+        userId: crypto.randomUUID(),
+        customerNo: 54321,
         password: await bcrypt.hash('12345', 10),
+        firstName: 'Mohsen',
+        lastName: 'Khashei',
+        email: 'muhsenkhasheii@gmail.com',
+        phoneNumber: 959595959,
+        address: 'cyprus nicosia',
+        imageUrl: 'http://testImage.jpg',
+        passportNo: 'p393939',
       };
 
       await this.usersModel.create(data);
