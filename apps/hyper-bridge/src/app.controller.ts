@@ -41,6 +41,8 @@ export class AppController {
     }
   }
 
-  // @Put('/auth/update/:userId')
-  // async update() {}
+  @Put('/auth/update/:userId')
+  async update() {
+    return { update: 'OK' };
+  }
 }

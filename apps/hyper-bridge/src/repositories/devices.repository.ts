@@ -1,7 +1,7 @@
 import { AbstractRepository } from '@app/common/database/abstract.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { DevicesDocument } from '../models/devices.schema';
 
 @Injectable()
