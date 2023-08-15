@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AppService } from 'apps/hyper-bridge/src/app.service';
-import { EncryptedDataDto } from 'apps/hyper-bridge/src/dto/encrypted.data.dto';
+import { RequestFormatDto } from 'apps/hyper-bridge/src/dto/data.format.type.dto';
 import { HeaderKeyDto } from 'apps/hyper-bridge/src/dto/header.key.dto';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -22,19 +22,21 @@ export class AuthenticationMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const requestBody = plainToClass(EncryptedDataDto, req.body);
+    const requestBody = plainToClass(RequestFormatDto, req.body);
     const requestBodyError = await validate(requestBody);
     const headerKey = plainToClass(HeaderKeyDto, req.headers);
     const headerKeyError = await validate(headerKey);
 
     if (requestBodyError.length > 0) {
-      this.logger.error(`${AuthenticationMiddleware.name} requestBodyError`);
+      this.logger.error(
+        `${AuthenticationMiddleware.name} : ${requestBodyError}`,
+      );
       throw new UnauthorizedException('The Posted Data Is Not Acceptable');
     }
     if (headerKeyError.length > 0) {
-      this.logger.error(`${AuthenticationMiddleware.name} ${headerKeyError}`);
+      this.logger.error(`${AuthenticationMiddleware.name} : ${headerKeyError}`);
       throw new UnauthorizedException(
-        'The key Parameter Not Existed In Header',
+        'The key Parameter Is Not Existed In Header',
       );
     }
 

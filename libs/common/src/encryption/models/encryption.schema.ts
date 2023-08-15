@@ -1,25 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+
 import { AbstractDocument } from '../../database/abstract.schema';
 
-// export type EncryptionDocument = Encryption & Document;
-
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, collection: 'encryptions' })
 export class EncryptionDocument extends AbstractDocument {
   @Prop()
+  serverPublicKey: string;
+
+  @Prop()
+  sharedSecret: string;
+
+  @Prop()
+  publicKey: string;
+
+  @Prop()
   key: string;
-
-  @Prop()
-  prime: string;
-
-  @Prop()
-  generator: string;
-
-  @Prop()
-  publicKey?: string;
-
-  @Prop()
-  secretKey?: string;
 }
 
 export const EncryptionSchema =

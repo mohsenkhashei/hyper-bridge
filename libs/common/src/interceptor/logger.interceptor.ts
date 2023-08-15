@@ -25,7 +25,8 @@ export class LoggingInterceptor implements NestInterceptor {
     const userAgent = request.get('user-agent') || '';
     const { ip, method, path: url } = request;
     this.logger.log(
-      `Headers: ${JSON.stringify(request.headers)} 
+      `Headers: ${JSON.stringify(request.headers)} |
+        Body: ${JSON.stringify(request.body)}
     |  ${method} ${url} ${userAgent} ${ip}: ${context.getClass().name} ${
         context.getHandler().name
       } invoked...`,

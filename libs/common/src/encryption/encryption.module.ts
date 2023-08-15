@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigModule } from '../config/config.module';
-import { KeyGeneratorService } from './service/key.generator.service';
+
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   EncryptionDocument,
@@ -23,7 +23,7 @@ import { EncryptionRepository } from './encryption.repository';
       { name: EncryptionDocument.name, schema: EncryptionSchema },
     ]),
   ],
-  providers: [KeyGeneratorService, EncryptionService, EncryptionRepository],
-  exports: [KeyGeneratorService, EncryptionService],
+  providers: [EncryptionService, EncryptionRepository],
+  exports: [EncryptionService],
 })
 export class EncryptionModule {}

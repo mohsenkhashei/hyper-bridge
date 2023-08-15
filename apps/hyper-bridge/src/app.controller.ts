@@ -3,32 +3,44 @@ import {
   Controller,
   Headers,
   Post,
+  Put,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { HandshakeUserDto } from './dto/handshake.user.dto';
-import { EncryptedDataDto } from './dto/encrypted.data.dto';
+import { RegisterDeviceDto } from './dto/register.device';
+import {
+  COMMUNICATION_TYPE,
+  RequestFormatDto,
+} from './dto/data.format.type.dto';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('/handshake')
+  @Post('/register')
   @UsePipes(
     new ValidationPipe({
       forbidNonWhitelisted: true,
     }),
   )
-  async handshake(@Body() handshakeUserDto: HandshakeUserDto) {
-    return await this.appService.handshake(handshakeUserDto);
+  async register(@Body() registerDeviceDto: RegisterDeviceDto) {
+    return await this.appService.register(registerDeviceDto);
   }
 
   @Post('/auth')
   async auth(
     @Headers() headers: Headers,
-    @Body() encryptedDataDto: EncryptedDataDto,
+    @Body() requestFormatDto: RequestFormatDto,
   ) {
-    return await this.appService.verifyUser(encryptedDataDto, headers);
+    if (requestFormatDto.requestType == COMMUNICATION_TYPE.HASH) {
+      return await this.appService.authenticateCustomer(
+        requestFormatDto,
+        headers,
+      );
+    }
   }
+
+  // @Put('/auth/update/:userId')
+  // async update() {}
 }
