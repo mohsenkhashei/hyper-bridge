@@ -38,17 +38,16 @@ export class LoggingInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap((res) => {
         const response = context.switchToHttp().getResponse();
-        // this.logger.error(response);
+        this.logger.log(`##### ${JSON.stringify(res)} #####`);
         const { statusCode } = response;
         const contentLength = response.get('content-length');
 
         this.logger.log(`
-       Response Headers: ${JSON.stringify(response.headers)}
+       Response Headers: ${JSON.stringify(response.headers)} | 
           ${method} ${url} ${statusCode} ${contentLength} - ${userAgent} ${ip}: ${
           Date.now() - now
         }ms
         `);
-        this.logger.log(`$Response: ${JSON.stringify(res)}`);
       }),
     );
   }

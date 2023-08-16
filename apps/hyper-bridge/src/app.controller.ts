@@ -3,7 +3,7 @@ import {
   Controller,
   Headers,
   Post,
-  Put,
+  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -12,7 +12,10 @@ import { RegisterDeviceDto } from './dto/register.device';
 import {
   COMMUNICATION_TYPE,
   RequestFormatDto,
+  ResponseFormatDto,
 } from './dto/data.format.type.dto';
+import { Response } from 'express';
+import { CustomResponse } from '@app/common/headers/custom.response';
 
 @Controller()
 export class AppController {
@@ -32,17 +35,22 @@ export class AppController {
   async auth(
     @Headers() headers: Headers,
     @Body() requestFormatDto: RequestFormatDto,
+    @Res() res: Response,
   ) {
     if (requestFormatDto.requestType == COMMUNICATION_TYPE.HASH) {
-      return await this.appService.authenticateCustomer(
+      const result = await this.appService.authenticateCustomer(
         requestFormatDto,
         headers,
       );
+      const deviceId = result.deviceId;
+      delete result.deviceId;
+      const customResponse = new CustomResponse(res);
+      customResponse.setCustomHeader('X-DEVICE-ID', deviceId).send(result);
+    } else {
+      return {
+        responseType: COMMUNICATION_TYPE.JSON,
+        data: 'without encryption communication of this method does not implemented yet',
+      };
     }
-  }
-
-  @Put('/auth/update/:userId')
-  async update() {
-    return { update: 'OK' };
   }
 }
