@@ -2,6 +2,7 @@ import {
   Inject,
   Injectable,
   LoggerService,
+  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import * as bcrypt from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { DevicesRepository } from './repositories/devices.repository';
+import { UserIdDto } from './dto/user.id.dto';
 
 @Injectable()
 export class AppService {
@@ -86,12 +88,11 @@ export class AppService {
   async authenticateCustomer(
     requestFormatDto: RequestFormatDto,
     headers: Headers,
-  ): Promise<ResponseFormatDto> {
+  ) {
     try {
       const publicKey = headers['key'];
       const payload = requestFormatDto.data as unknown as string;
-      console.log(publicKey);
-      console.log(payload);
+
       const decryptedData = await this.encryptionService.decrypting(
         payload,
         publicKey,
@@ -103,23 +104,43 @@ export class AppService {
       await this.checkUserCredentialIsValid(userCredential);
       // // check user exist in DB or not
       const user = await this.checkUserExist(userCredential);
-      console.log(user);
-      // create new user for response
-      const { _id, password, ...safeUser } = user;
-      console.log({ safeUser });
+
+      // update user device
+      const deviceId = await this.updateUserDevice(user._id, publicKey);
+
+      const userData = await this.getUserInformation(user.userId);
       // encrypt data
       const encryptedData = await this.encryptionService.encrypting(
-        JSON.stringify(safeUser),
+        JSON.stringify(userData),
         publicKey,
       );
-      console.log(encryptedData);
-      return { responseType: COMMUNICATION_TYPE.HASH, data: encryptedData };
+
+      return {
+        responseType: COMMUNICATION_TYPE.HASH,
+        data: encryptedData,
+        deviceId,
+      };
     } catch (err) {
       this.logger.error(err);
       throw err;
     }
   }
-
+  private async updateUserDevice(_id, publicKey: string) {
+    try {
+      const device = await this.devicesRepository.findOneAndUpdate(
+        { publicKey },
+        { user: _id },
+      );
+      await this.usersRepository.findOneAndUpdate(
+        { _id },
+        { devices: device._id },
+      );
+      return device.deviceId;
+    } catch (err) {
+      this.logger.error('user does not have device registered');
+      throw new NotFoundException('User Need to Register a Device First');
+    }
+  }
   private async checkUserCredentialIsValid(
     userCredentialDto: UserCredentialDto,
   ) {
@@ -161,5 +182,12 @@ export class AppService {
    */
   async checkPublicKeyIsValid(publicKey: string) {
     return await this.encryptionService.checkPublicKeyExist(publicKey);
+  }
+
+  private async getUserInformation(userId: string) {
+    return await this.usersRepository.findUserAndDevices(
+      { userId },
+      { _id: 0, password: 0 },
+    );
   }
 }
