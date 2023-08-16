@@ -6,6 +6,15 @@ Schema of project:
 The Encryption Part:
 ![Alt text](image-1.png)
 
+## Overview
+
+- Implement Encryption & Decryption for secure communication ( encryption module )
+- Microservice Architecture
+- Advanced Logging ( log request & response )
+- Enterprise Mongoose usage ( database module )
+- Central config mechanism with feature service base
+- Custom Header for Response
+
 ## Installation
 
 ```bash
@@ -103,6 +112,7 @@ Created another repository [hyper-bride-consumer](https://github.com/mohsenkhash
         }
     ]
 }
+# X-DEVICE-ID will send in reponse with deviceID
 ```
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/1566887-79f2b501-f517-452f-898d-3301c5284210?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D1566887-79f2b501-f517-452f-898d-3301c5284210%26entityType%3Dcollection%26workspaceId%3Df20b8551-2f10-4363-b926-f1d77d8643ff)
